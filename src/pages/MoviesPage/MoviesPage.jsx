@@ -7,16 +7,17 @@ import MovieList from '../../components/MovieList/MovieList';
 
 const MoviesPage = () => {
   const [movies, setMovies] = useState([]);
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams(); 
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    setSearchParams({});
-  }, [setSearchParams]);
+ 
+  const currentQuery = searchParams.get('query');
 
   useEffect(() => {
-    const currentQuery = searchParams.get('query');
-    if (!currentQuery) return;
+    if (!currentQuery) {
+      setMovies([]);
+      return; 
+    }
 
     const fetchMovieByQuery = async () => {
       try {
@@ -25,16 +26,21 @@ const MoviesPage = () => {
         setError('');
       } catch (e) {
         setError('Failed to load movies. Please try again later.');
+        setMovies([]); 
       }
     };
     fetchMovieByQuery();
-  }, [searchParams, setSearchParams]);
+  }, [currentQuery]);
 
   return (
     <>
       <Form setSearchParams={setSearchParams} />
       {error && <div>{error}</div>}
-      {movies.length > 0 ? <MovieList movies={movies} /> : searchParams.get('query') !== null && <p>No movies found.</p>}
+      {movies.length > 0 ? (
+        <MovieList movies={movies} />
+      ) : (
+        currentQuery && <p>No movies found.</p> 
+      )}
     </>
   );
 };
